@@ -101,7 +101,7 @@ class i3d:
     def summary(self):
         print(self.model.summary())
 
-    def train(self, train_gen, epochs=10, epoch_steps=5000, val_gen=None, val_steps=None, validation=False, log_path="logs/i3d_speed/", save_path=None):
+    def train(self, train_gen, epochs=10, epoch_steps=5000, val_gen=None, val_steps=None, validation=False, log_path="logs/", save_path=None):
 
 
         '''training the model

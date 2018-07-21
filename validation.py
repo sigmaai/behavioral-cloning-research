@@ -69,5 +69,7 @@ if __name__ == "__main__":
 
     print("Validating...")
     score = validation_score('i3d_32_12.h5')
-    print("Finished!")
     print(score)
+    score2 = validation_score('i3d_32_13.h5')
+    print("Finished!")
+    print(score2)

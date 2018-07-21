@@ -188,120 +188,6 @@ def load_gray_image(image_file):
     return img
 
 
-def comma_validation_generator(data, batch_size):
-
-    """
-    Generate training images given image paths and associated steering angles
-
-    Args:
-         data (numpy.array)        : the loaded data (converted to list from pandas format)
-         batch_size (int)   : batch size for training
-         training: (boolean): whether to use augmentation or not.
-
-    Yields:
-         images ([tensor])  : images for training
-         angles ([float])   : the corresponding steering angles
-
-
-    """
-
-    images = np.empty([batch_size, configs.LENGTH, configs.IMG_HEIGHT, configs.IMG_WIDTH, 3], dtype=np.int32)
-    labels = np.empty([batch_size])
-
-    while True:
-
-        c = 0
-
-        for index in np.random.permutation(data.shape[0]):
-
-            imgs = np.empty([configs.LENGTH, configs.IMG_HEIGHT, configs.IMG_WIDTH, 3], dtype=np.int32)
-
-            if index < configs.LENGTH:
-                start = 0
-                end = configs.LENGTH
-            elif index + configs.LENGTH >= len(data):
-                start = len(data) - configs.LENGTH - 1
-                end = len(data) - 1
-            else:
-                start = index
-                end = index + configs.LENGTH
-
-            for i in range(start, end):
-                center_path = "/home/neil/dataset/speedchallenge/data/val/" + str(data[i][1])
-                image = load_image(center_path)
-                imgs[i - start] = image
-
-            images[c] = imgs
-            labels[c] = data[end][2]
-
-            c += 1
-
-            if c == batch_size:
-                break
-
-        yield images, labels
-
-
-def comma_batch_generator(data, batch_size, augment):
-
-    """
-    Generate training images given image paths and associated steering angles
-
-    Args:
-         data (numpy.array)        : the loaded data (converted to list from pandas format)
-         batch_size (int)   : batch size for training
-         training: (boolean): whether to use augmentation or not.
-
-    Yields:
-         images ([tensor])  : images for training
-         angles ([float])   : the corresponding steering angles
-
-
-    """
-
-    images = np.empty([batch_size, configs.LENGTH, configs.IMG_HEIGHT, configs.IMG_WIDTH, 3], dtype=np.int32)
-    labels = np.empty([batch_size])
-
-    while True:
-
-        c = 0
-
-        for index in np.random.permutation(data.shape[0]):
-
-            imgs = np.empty([configs.LENGTH, configs.IMG_HEIGHT, configs.IMG_WIDTH, 3], dtype=np.int32)
-
-            if index < configs.LENGTH:
-                start = 0
-                end = configs.LENGTH
-            elif index + configs.LENGTH >= len(data):
-                start = len(data) - configs.LENGTH - 1
-                end = len(data) - 1
-            else:
-                start = index
-                end = index + configs.LENGTH
-
-            for i in range(start, end):
-                center_path = "/home/neil/dataset/speedchallenge/data/train/" + str(data[i][1])
-                image = load_image(center_path)
-                imgs[i - start] = image
-
-            # augmentaion if needed
-            if augment and bool(random.getrandbits(1)):
-                imgs, angle = augument(imgs, data[end][2])
-            else:
-                angle = data[end][2]
-
-            images[c] = imgs
-            labels[c] = angle
-
-            c += 1
-
-            if c == batch_size:
-                break
-
-        yield images, labels
-
-
 def udacity_batch_generator(data, batch_size, augment):
 
     """
@@ -347,9 +233,9 @@ def udacity_batch_generator(data, batch_size, augment):
 
             # augmentaion if needed
             if augment and bool(random.getrandbits(1)):
-                imgs, angle = augument(imgs, data[end][8])
+                imgs, angle = augument(imgs, data[end][6])
             else:
-                angle = data[end][8]
+                angle = data[end][6]
 
             images[c] = imgs
             labels[c] = angle
