@@ -18,7 +18,7 @@ import helper
 import configs
 
 pygame.init()
-size = (640*2, 480*4)
+size = (640, 480*2)
 pygame.display.set_caption("self driving data viewer")
 screen = pygame.display.set_mode(size, pygame.DOUBLEBUF)
 screen.set_alpha(None)
@@ -107,17 +107,11 @@ def draw_path_on(img, speed_ms, angle_steers, color=(0, 0, 255)):
     draw_path(img, path_x, path_y, color)
 
 
-def preprocess_img(img):
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    return img
-
-
-def steering_viz_loop():
+def steering_loop():
 
     # loading models
-    # -------------------------------------------------
-    model = i3d(weights_path='id3_32_5.h5', input_shape=(configs.LENGTH, configs.IMG_HEIGHT, configs.IMG_WIDTH, configs.CHANNELS))
-
+    model = i3d(weights_path='i3d_32_15.h5', input_shape=(configs.LENGTH, configs.IMG_HEIGHT, configs.IMG_WIDTH, configs.CHANNELS))
+    model.summary()
     # -------------------------------------------------
     # steerings and images
     steering_labels = path.join(configs.VAL_DIR, 'labels.csv')
@@ -132,8 +126,8 @@ def steering_viz_loop():
     ax.tick_params(axis='y', labelsize=8)
     line1, = ax.plot([], [], 'b.-', label='Human')
     line2, = ax.plot([], [], 'r.-', label='Model')
-    A = []
-    B = []
+    a = []
+    b = []
     ax.legend(loc='upper left', fontsize=8)
 
     myFont = pygame.font.SysFont("monospace", 18)
@@ -155,23 +149,24 @@ def steering_viz_loop():
             if event.type == pygame.QUIT:
                 break
 
-        p = configs.VAL_DIR + "center/" + str(df_truth['frame_id'].loc[i]) + ".jpg"
-        img = helper.load_image(p)
+        img = helper.load_image(configs.VAL_DIR + "center/" + str(df_truth['frame_id'].loc[i]) + ".jpg", auto_resize=False)
+        in_frame = cv2.resize(img, (configs.IMG_WIDTH, configs.IMG_HEIGHT))
         input.pop(0)
-        input.append(img)
-        input_array = np.array([img])
+        input.append(in_frame)
+        input_array = np.array([input])
+        print(input_array.shape)
         prediction = model.model.predict(input_array)[0][0]
-        actual_steers = df_truth['steering_angle'].loc[i]  # * 0.1 - 8 * 0.0174533  # 1 degree right correction
+        actual_steers = df_truth['steering_angle'].loc[i]
 
-        draw_path_on(img, speed_ms, actual_steers / 2)  # human is blue
-        draw_path_on(img, speed_ms, prediction / 2, (255, 0, 0))  # prediction is red
+        draw_path_on(img, speed_ms, actual_steers / 2)              # human is blue
+        draw_path_on(img, speed_ms, prediction / 2, (255, 0, 0))    # prediction is red
 
-        A.append(actual_steers)
-        B.append(prediction)
-        line1.set_ydata(A)
-        line1.set_xdata(range(len(A)))
-        line2.set_ydata(B)
-        line2.set_xdata(range(len(B)))
+        a.append(actual_steers)
+        b.append(prediction)
+        line1.set_ydata(a)
+        line1.set_xdata(range(len(a)))
+        line2.set_ydata(b)
+        line2.set_xdata(range(len(b)))
         ax.relim()
         ax.autoscale_view()
 
@@ -197,95 +192,6 @@ def steering_viz_loop():
         pygame.display.flip()
 
 
-def cruise_control_viz_loop():
-
-    # load model (type 2)
-    model = None # ResearchModels(nb_classes=1, saved_model='/home/neil/Desktop/rm010_5.h5')
-
-    # read the steering labels and image path
-    df_truth = pd.read_csv('/home/neil/dataset/udacity/test.csv', usecols=['frame_id', 'speed'], index_col=None)
-
-    # Create second screen with matplotlibs
-    fig = pylab.figure(figsize=[6.4, 1.6], dpi=100)
-    ax = fig.gca()
-    ax.tick_params(axis='x', labelsize=8)
-    ax.tick_params(axis='y', labelsize=8)
-    # ax.legend(loc='upper left',fontsize=8)
-    line1, = ax.plot([], [], 'b.-', label='Human')
-    line2, = ax.plot([], [], 'r.-', label='Model')
-    A = []
-    B = []
-    ax.legend(loc='upper left', fontsize=8)
-
-    myFont = pygame.font.SysFont("monospace", 18)
-    randNumLabel = myFont.render('Human Steer Angle:', 1, blue)
-    randNumLabel2 = myFont.render('Model Steer Angle:', 1, red)
-    speed_ms = 5  # log['speed'][i]
-
-    input = []
-
-    for i in range(configs.LENGTH):
-        file = str(df_truth['frame_id'].loc[i])
-        img = helper.load_image(file)
-        input.append(img)
-
-    # Run through all images
-    for i in range(configs.LENGTH, len(df_truth)):
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                break
-
-        img = helper.load_image(str(df_truth['frame_id'].loc[i]))
-        input.pop()
-        input.insert(0, img)
-        input_array = np.array([np.asarray(input)])
-        prediction = model.model.predict(input_array)[0][0]
-        act_speed = df_truth['speed'].loc[i]
-
-        A.append(act_speed)
-        B.append(prediction)
-        line1.set_ydata(A)
-        line1.set_xdata(range(len(A)))
-        line2.set_ydata(B)
-        line2.set_xdata(range(len(B)))
-        ax.relim()
-        ax.autoscale_view()
-
-        canvas = agg.FigureCanvasAgg(fig)
-        canvas.draw()
-        renderer = canvas.get_renderer()
-        raw_data = renderer.tostring_rgb()
-        size = canvas.get_width_height()
-        surf = pygame.image.fromstring(raw_data, size, "RGB")
-        screen.blit(surf, (0, 480))
-
-        # draw on
-        pygame.surfarray.blit_array(camera_surface, img.swapaxes(0, 1))
-        screen.blit(camera_surface, (0, 0))
-
-        if prediction < 10:
-            status = " very slow"
-        elif prediction >= 10 and prediction < 25:
-            status = " slow"
-        elif prediction >= 25 and prediction < 45:
-            status=  " medium"
-        elif prediction >= 45 and prediction < 60:
-            status = " fast"
-        else:
-            status = " nil"
-
-        diceDisplay = myFont.render(str(round(act_speed)), 1, blue)
-        diceDisplay2 = myFont.render(str(round(prediction)) + status, 1, red)
-        screen.blit(randNumLabel, (50, 420))
-        screen.blit(randNumLabel2, (400, 420))
-        screen.blit(diceDisplay, (50, 450))
-        screen.blit(diceDisplay2, (400, 450))
-        clock.tick(60)
-        pygame.display.flip()
-
-
 if __name__ == "__main__":
 
-    # cruise_control_viz_loop()
-    steering_viz_loop()
+    steering_loop()

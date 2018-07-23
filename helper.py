@@ -1,20 +1,14 @@
-
-'''
-training helper
-methods for training deep learning models
-By Neil Nie
-(c) Yongyang Nie, 2018. All Rights Reserved
-Contact: contact@neilnie.com
-
-'''
+#
+# training helper
+# methods for training deep learning models
+# By Neil Nie
+# (c) Yongyang Nie, 2018. All Rights Reserved
+# Contact: contact@neilnie.com
 
 import cv2
 import numpy as np
 import random
 import configs
-from keras import backend as K
-import tensorflow as tf
-from keras import metrics
 
 
 def rotate(img):
@@ -101,7 +95,7 @@ def augument(images, angle):
     :returns: a tensor of the augmented images
     :returns: the steering angle
     """
-    a = np.random.randint(0, 4, [1, 5]).astype('bool')[0]
+    a = np.random.randint(0, 3, [1, 5]).astype('bool')[0]
     if a[0] == 1:
         for idx in range(len(images)):
             image = images[idx].astype(np.uint8)
@@ -114,11 +108,11 @@ def augument(images, angle):
         for idx in range(len(images)):
             image = images[idx].astype(np.uint8)
             images[idx] = random_brightness(image)
-    if a[3] == 1:
-        for idx in range(len(images)):
-            image = images[idx].astype(np.uint8)
-            images[idx] = flip_image(image)
-        angle = -1 * angle
+    # if a[3] == 1:
+    #     for idx in range(len(images)):
+    #         image = images[idx].astype(np.uint8)
+    #         images[idx] = flip_image(image)
+    #     angle = -1 * angle
 
     return images, angle
 
@@ -137,46 +131,14 @@ def get_output_dim(model):
     raise ValueError('Could not infer output dim')
 
 
-def std_evaluate(model, generator):
-    """
-    """
-    size = generator.get_size()
-    batch_size = generator.get_batch_size()
-    n_batches = size / batch_size
-
-    err_sum = 0.
-    err_count = 0.
-    for _ in range(n_batches):
-        X_batch, y_batch = generator.next()
-        y_pred = model.predict_on_batch(X_batch)
-        err_sum += np.sum((y_batch - y_pred) ** 2)
-        err_count += len(y_pred)
-
-    mse = err_sum / err_count
-    return [mse, np.sqrt(mse)]
-
-
-def rmse(y_true, y_pred):
-    """
-    Calculates RMSE
-    """
-    return K.sqrt(K.mean(K.square(y_pred - y_true)))
-
-
-def top_2(y_true, y_pred):
-    return K.mean(tf.nn.in_top_k(y_pred, K.argmax(y_true, axis=-1), 2))
-
-metrics.rmse = rmse
-metrics.top_2 = top_2
-
-# ----------------------------------------------------------------
-
-
-def load_image(image_file):
+def load_image(image_file, auto_resize=True):
 
     img = cv2.imread(image_file)
-    img = cv2.resize(img, (configs.IMG_WIDTH, configs.IMG_HEIGHT))
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+    if auto_resize:
+        img = cv2.resize(img, (configs.IMG_WIDTH, configs.IMG_HEIGHT))
+
     return img
 
 

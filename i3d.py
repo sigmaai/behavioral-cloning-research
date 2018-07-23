@@ -33,8 +33,6 @@ from keras.layers import Dropout
 from keras.layers import Reshape
 from keras.optimizers import Adam
 from keras.layers import Flatten
-
-from keras.models import load_model
 from keras.callbacks import TensorBoard
 import datetime
 from keras import backend as K
@@ -101,13 +99,11 @@ class i3d:
     def summary(self):
         print(self.model.summary())
 
-    def train(self, train_gen, epochs=10, epoch_steps=5000, val_gen=None, val_steps=None, validation=False, log_path="logs/", save_path=None):
-
+    def train(self, train_gen, epochs=10, epoch_steps=5000, val_gen=None, val_steps=None, validation=False, log_path="logs/32/", save_path=None):
 
         '''training the model
 
-        :param train_gen: training generator. For details, please read the
-        implementation in helper.py
+        :param train_gen: training generator. For details, please read the implementation in helper.py
         :param val_gen: validation generator, for now it's required.
         :param epoch: number of training epochs.
         :param epoch_steps: number of training steps per epoch. (!= batch_size)
@@ -124,17 +120,16 @@ class i3d:
         if validation:
             if val_gen and val_steps:
                 self.model.fit_generator(train_gen, steps_per_epoch=epoch_steps,
-                                         epochs=epochs, validation_data=val_gen, validation_steps=val_steps,
+                                         epochs=epochs, validation_data=val_gen,
+                                         validation_steps=val_steps,
                                          verbose=1, callbacks=[tensorboard])  #
             else:
                 raise Exception('please specify val_gen and val_steps')
 
         else:
-            self.model.fit_generator(train_gen, steps_per_epoch=epoch_steps,
-                                     epochs=epochs, verbose=1, callbacks=[tensorboard])
+            self.model.fit_generator(train_gen, steps_per_epoch=epoch_steps, epochs=epochs, verbose=1, callbacks=[tensorboard])
 
         self.model.save(save_path)
-
 
     def create_model(self, img_input):
 
@@ -313,8 +308,8 @@ class i3d:
         # create model
         model = Model(inputs, x, name='i3d_inception')
         optimizer = Adam(lr=1e-5, decay=1e-6)
-        # self.root_mean_squared_error
-        model.compile(loss='mse', optimizer=optimizer, metrics=['mse'])
+        #
+        model.compile(loss=self.root_mean_squared_error, optimizer=optimizer, metrics=[self.root_mean_squared_error])
 
         return model
 

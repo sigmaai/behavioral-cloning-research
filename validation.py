@@ -5,7 +5,6 @@
 
 
 from i3d import i3d
-import cv2
 import configs
 from os import path
 import pandas as pd
@@ -15,15 +14,13 @@ import math
 import time
 
 
-def validation_score(model_path):
+def validation_score(model_path, write_output=False):
 
-    model = i3d(input_shape=(configs.LENGTH, configs.IMG_HEIGHT, configs.IMG_WIDTH, configs.CHANNELS),
-                    weights_path=model_path)
+    model = i3d(input_shape=(configs.LENGTH, configs.IMG_HEIGHT, configs.IMG_WIDTH, configs.CHANNELS), weights_path=model_path)
 
     # steerings and images
     steering_labels = path.join(configs.VAL_DIR, 'labels.csv')
 
-    # read the steering labels and image path
     df_truth = pd.read_csv(steering_labels, usecols=['frame_id', 'steering_angle'], index_col=None)
 
     esum = 0
@@ -41,11 +38,10 @@ def validation_score(model_path):
     # Run through all images
     for i in range(configs.LENGTH, len(df_truth)):
 
-        p = configs.VAL_DIR + "center/" + str(df_truth['frame_id'].loc[i]) + ".jpg"
-        img = helper.load_image(p)
+        img = helper.load_image(configs.VAL_DIR + "center/" + str(df_truth['frame_id'].loc[i]) + ".jpg")
         input.pop(0)
         input.append(img)
-        input_array = np.array([np.asarray(input)])
+        input_array = np.array([input])
         prediction = model.model.predict(input_array)[0][0]
         actual_steers = df_truth['steering_angle'].loc[i]
         e = (actual_steers - prediction) ** 2
@@ -58,9 +54,14 @@ def validation_score(model_path):
             print('.')
 
     print("time per step: %s seconds" % ((time.time() - start_time) / len(predictions)))
-    # print("Writing predictions...")
-    # pd.DataFrame({"steering_angle": predictions}).to_csv('./result.csv', index=False, header=True)
-    # print("Done!")
+
+    if write_output:
+        print("Writing predictions...")
+        pd.DataFrame({"steering_angle": predictions}).to_csv('./result.csv', index=False, header=True)
+        print("Done!")
+    else:
+        print("Not writing outputs")
+        print("Done")
 
     return math.sqrt(esum / len(predictions))
 
@@ -68,8 +69,5 @@ def validation_score(model_path):
 if __name__ == "__main__":
 
     print("Validating...")
-    score = validation_score('i3d_32_12.h5')
-    print(score)
-    score2 = validation_score('i3d_32_13.h5')
-    print("Finished!")
-    print(score2)
+    score = validation_score('i3d_32_15.h5')
+    print("score: " + str(score))
