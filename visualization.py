@@ -18,7 +18,7 @@ import helper
 import configs
 
 pygame.init()
-size = (640, 480*2)
+size = (640, 650)
 pygame.display.set_caption("self driving data viewer")
 screen = pygame.display.set_mode(size, pygame.DOUBLEBUF)
 screen.set_alpha(None)
@@ -154,7 +154,6 @@ def steering_loop():
         input.pop(0)
         input.append(in_frame)
         input_array = np.array([input])
-        print(input_array.shape)
         prediction = model.model.predict(input_array)[0][0]
         actual_steers = df_truth['steering_angle'].loc[i]
 

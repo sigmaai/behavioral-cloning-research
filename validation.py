@@ -69,5 +69,5 @@ def validation_score(model_path, write_output=False):
 if __name__ == "__main__":
 
     print("Validating...")
-    score = validation_score('i3d_32_15.h5')
+    score = validation_score('i3d_rgb_32_18.h5')
     print("score: " + str(score))

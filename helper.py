@@ -150,20 +150,57 @@ def load_gray_image(image_file):
     return img
 
 
+def optical_flow_rgb(previous, current):
+
+    ''' perform optical flow on two consequtive frames
+    and then return the RGB results.
+
+    :param previous: the previous frame (rgb)
+    :param current: the current frame (rgb)
+    :return: rgb image after optical flow
+    '''
+
+    previous_gray = cv2.cvtColor(previous, cv2.COLOR_RGB2GRAY)
+    gray = cv2.cvtColor(current, cv2.COLOR_RGB2GRAY)
+
+    flow = cv2.calcOpticalFlowFarneback(previous_gray, gray, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+
+    hsvImg = np.zeros_like(previous)
+    hsvImg[..., 1] = 255
+    # Obtain the flow magnitude and direction angle
+    mag, ang = cv2.cartToPolar(flow[..., 0], flow[..., 1])
+
+    # Update the color image
+    hsvImg[..., 0] = 0.5 * ang * 180 / np.pi
+    hsvImg[..., 2] = cv2.normalize(mag, None, 0, 255, cv2.NORM_MINMAX)
+    rgbImg = cv2.cvtColor(hsvImg, cv2.COLOR_HSV2BGR)
+    rgbImg = cv2.resize(rgbImg, (configs.IMG_WIDTH, configs.IMG_HEIGHT))
+
+    return rgbImg
+
+
+def optical_flow(previous, current):
+
+    gray1 = cv2.cvtColor(previous, cv2.COLOR_RGB2GRAY)
+    gray2 = cv2.cvtColor(current, cv2.COLOR_RGB2GRAY)
+    flow = cv2.calcOpticalFlowFarneback(gray1, gray2, None, 0.5, 3, 15, 3, 5, 1.5, 0)
+
+    return flow
+
+
 def udacity_batch_generator(data, batch_size, augment):
 
     """
     Generate training images given image paths and associated steering angles
 
     Args:
-         data (numpy.array)        : the loaded data (converted to list from pandas format)
-         batch_size (int)   : batch size for training
-         training: (boolean): whether to use augmentation or not.
+    :param data (numpy.array)        : the loaded data (converted to list from pandas format)
+    :param batch_size (int)   : batch size for training
+    :param training: (boolean): whether to use augmentation or not.
 
     Yields:
          images ([tensor])  : images for training
          angles ([float])   : the corresponding steering angles
-
 
     """
 
@@ -253,3 +290,237 @@ def validation_batch_generator(data, batch_size):
         yield images, labels
 
 
+def udacity_flow_batch_gen(data, batch_size):
+
+    """
+    Generate training images given image paths and associated steering angles
+
+    :param data         : (numpy.array) the loaded data (converted to list from pandas format)
+    :param batch_size   :  (int) batch size for training
+
+    :rtype: Iterator[images, angles] images for training
+    the corresponding steering angles
+
+    """
+
+    images = np.empty([batch_size, configs.LENGTH, configs.IMG_HEIGHT, configs.IMG_WIDTH, 2], dtype=np.int32)
+    labels = np.empty([batch_size])
+
+    while True:
+
+        c = 0
+
+        for index in np.random.permutation(data.shape[0]):
+
+            imgs = np.empty([configs.LENGTH, configs.IMG_HEIGHT, configs.IMG_WIDTH, 2], dtype=np.int32)
+
+            if index < configs.LENGTH + 1:
+                start = 0
+                end = configs.LENGTH + 1
+            elif index + configs.LENGTH + 1 >= len(data):
+                start = len(data) - configs.LENGTH - 1
+                end = len(data) - 1
+            else:
+                start = index
+                end = index + configs.LENGTH + 1
+
+            grays = []
+            for i in range(start, end):
+                path = str(data[i][5])
+                gray = load_gray_image(path)
+                grays.append(gray)
+
+            current = grays[0]
+            for i in range(1, len(grays)):
+                flow = cv2.calcOpticalFlowFarneback(current, grays[i], None, 0.5, 3, 15, 3, 5, 1.5, 0)
+                current = grays[i]
+                imgs[i-1] = flow
+
+            speed = data[end][2]
+            images[c] = imgs
+            labels[c] = speed
+
+            c += 1
+
+            if c == batch_size:
+                break
+
+        yield images, labels
+
+
+def udacity_flow_rgb_batch_gen(data, batch_size):
+
+    """
+    Generate batches of training inputs with the corresponding driving speed.
+    1. perform optical flow on two consecutive images.
+    2. convert the optical flow result from HSV to RGB
+    3. stack n frames of these rgb frames into a training input.
+
+    :param data        : (numpy.array) the loaded data (converted to list from pandas format)
+    :param batch_size  : (int) batch size for training
+
+    :rtype: Iterator[images, angles] images for training
+    the corresponding steering angles
+
+    """
+
+    images = np.empty([batch_size, configs.LENGTH, configs.IMG_HEIGHT, configs.IMG_WIDTH, 3], dtype=np.int32)
+    labels = np.empty([batch_size])
+
+    while True:
+
+        c = 0
+
+        for index in np.random.permutation(data.shape[0]):
+
+            imgs = np.empty([configs.LENGTH, configs.IMG_HEIGHT, configs.IMG_WIDTH, 3], dtype=np.int32)
+
+            if index < configs.LENGTH + 1:
+                start = 0
+                end = configs.LENGTH + 1
+            elif index + configs.LENGTH + 1 >= len(data):
+                start = len(data) - configs.LENGTH - 1
+                end = len(data) - 1
+            else:
+                start = index
+                end = index + configs.LENGTH + 1
+
+            raws = []
+            for i in range(start, end):
+                path = str(data[i][5])
+                raw = load_image(path)
+                raws.append(raw)
+
+            current = raws[0]
+            for i in range(1, len(raws)):
+                rgb_img = optical_flow_rgb(previous=current, current=raws[i])
+                imgs[i-1] = rgb_img
+
+            speed = data[end][2]
+            images[c] = imgs
+            labels[c] = speed
+
+            c += 1
+
+            if c == batch_size:
+                break
+
+        yield images, labels
+
+
+def udacity_flow_val_gen(data, batch_size):
+
+    """
+    Generate training images given image paths and associated steering angles
+
+    :param data         : (numpy.array) the loaded data (converted to list from pandas format)
+    :param batch_size   :  (int) batch size for training
+
+    :rtype: Iterator[images, angles] images for training
+    the corresponding steering angles
+
+    """
+
+    images = np.empty([batch_size, configs.LENGTH, configs.IMG_HEIGHT, configs.IMG_WIDTH, 2], dtype=np.int32)
+    labels = np.empty([batch_size])
+
+    while True:
+
+        c = 0
+
+        for index in np.random.permutation(data.shape[0]):
+
+            output = np.empty([configs.LENGTH, configs.IMG_HEIGHT, configs.IMG_WIDTH, 2], dtype=np.int32)
+
+            if index < configs.LENGTH + 1:
+                start = 0
+                end = configs.LENGTH + 1
+            elif index + configs.LENGTH + 1 >= len(data):
+                start = len(data) - configs.LENGTH - 1
+                end = len(data) - 1
+            else:
+                start = index
+                end = index + configs.LENGTH + 1
+
+            imgs = []
+            for i in range(start, end):
+                path = '/home/neil/dataset/steering/test/center/' + str(data['frame_id'].iloc[i]) + ".jpg"
+                image = load_image(path)
+                imgs.append(image)
+
+            current = imgs[0]
+            for i in range(1, len(imgs)):
+                flow = optical_flow(current, imgs[i])
+                current = imgs[i]
+                output[i-1] = flow
+
+            angle = data['steering_angle'].iloc[end]
+            images[c] = output
+            labels[c] = angle
+
+            c += 1
+
+            if c == batch_size:
+                break
+
+        yield images, labels
+
+
+def udacity_flow_rgb_val_gen(data, batch_size):
+
+    """
+    Generate batches of training inputs with the corresponding driving speed.
+    1. perform optical flow on two consecutive images.
+    2. convert the optical flow result from HSV to RGB
+    3. stack n frames of these rgb frames into a training input.
+
+    :param data        : (numpy.array) the loaded data (converted to list from pandas format)
+    :param batch_size  : (int) batch size for training
+
+    :rtype: Iterator[images, angles] images for training
+    the corresponding steering angles
+
+    """
+
+    images = np.empty([batch_size, configs.LENGTH, configs.IMG_HEIGHT, configs.IMG_WIDTH, 3], dtype=np.int32)
+    labels = np.empty([batch_size])
+
+    while True:
+
+        c = 0
+
+        for index in np.random.permutation(data.shape[0]):
+
+            imgs = np.empty([configs.LENGTH, configs.IMG_HEIGHT, configs.IMG_WIDTH, 3], dtype=np.int32)
+
+            if index < configs.LENGTH + 1:
+                start = 0
+                end = configs.LENGTH + 1
+            elif index + configs.LENGTH + 1 >= len(data):
+                start = len(data) - configs.LENGTH - 1
+                end = len(data) - 1
+            else:
+                start = index
+                end = index + configs.LENGTH + 1
+
+            raws = []
+            for i in range(start, end):
+                center_path = '/home/neil/dataset/steering/test/center/' + str(data[i][0]) + ".jpg"
+                raw = load_image(center_path)
+                raws.append(raw)
+
+            current = raws[0]
+            for i in range(1, len(raws)):
+                rgb_img = optical_flow_rgb(previous=current, current=raws[i])
+                imgs[i-1] = rgb_img
+
+            speed = data[end][2]
+            images[c] = imgs
+            labels[c] = speed
+
+            c += 1
+
+            if c == batch_size:
+                break
+
+        yield images, labels

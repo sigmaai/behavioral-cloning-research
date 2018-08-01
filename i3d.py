@@ -33,61 +33,55 @@ from keras.layers import Dropout
 from keras.layers import Reshape
 from keras.optimizers import Adam
 from keras.layers import Flatten
+from keras.optimizers import SGD
 from keras.callbacks import TensorBoard
 import datetime
 from keras import backend as K
+import helper
 
 
 class i3d:
 
     def __init__(self, weights_path=None, input_shape=None,
-                 dropout_prob=0.0, endpoint_logit=True, classes=1):
-
-        # type: (weights_path, input_shape, dropout_prob, endpoint_logit, classes) -> None
+                 dropout_prob=0.0, classes=1):
 
         '''Instantiates the Inflated 3D Inception v1 architecture.
 
-        Optionally loads weights pre-trained on Kinetics. Note that when using TensorFlow,
-        Always channel last. The model and the weights are compatible with both
-        TensorFlow. The data format convention used by the model is the one
-        specified in your Keras config file.
-        Note that the default input frame(image) size for this model is 224x224.
+        Optionally loads weights pre-trained on Kinetics. Note that when using TensorFlow, Always channel last.
+        The model and the weights are compatible with both TensorFlow. The data format convention used by the
+        model is the one specified in your Keras config file. Note that the default input frame(image) size for
+        this model is 224x224.
 
         :param weights_path: one of `None` (random initialization)
-        :param input_shape: optional shape tuple, only to be specified
-                if `include_top` is False (otherwise the input shape should have exactly
-                3 inputs channels. NUM_FRAMES should be no smaller than 8. The authors
-                used 64 frames per example for training and testing on kinetics dataset
-                Width and height should be no smaller than 32.
-                i.e.: `(64, 150, 150, 3)` would be one valid value.
-        :param dropout_prob: optional, dropout probability applied in dropout layer
-                after global average pooling layer.
-                0.0 means no dropout is applied, 1.0 means dropout is applied to all features.
-                Note: Since Dropout is applied just before the classification
-                layer, it is only useful when `include_top` is set to True.
-        :param endpoint_logit: (boolean) optional. If True, the model's forward pass
-                will end at producing logits. Otherwise, softmax is applied after producing
-                the logits to produce the class probabilities prediction. Setting this parameter
-                to True is particularly useful when you want to combine results of rgb model
-                and optical flow model.
-                - `True` end model forward pass at logit output
-                - `False` go further after logit to produce softmax predictions
-                Note: This parameter is only useful when `include_top` is set to True.
-        :param classes: For regression (i.e. behavorial cloning) 1 is the default value.
-                optional number of classes to classify images into, only to be specified
-                if `include_top` is True, and if no `weights` argument is specified.
+        :param input_shape: optional shape tuple, only to be specified if `include_top` is False
+            (otherwise the input shape should have exactly 3 inputs channels. NUM_FRAMES should be no
+            smaller than 8. The authors used 64 frames per example for training and testing on kinetics
+            dataset Width and height should be no smaller than 32. i.e.: `(64, 150, 150, 3)` would be one valid value.
+        :param dropout_prob: optional, dropout probability applied in dropout layer after global
+            average pooling layer. 0.0 means no dropout is applied, 1.0 means dropout is applied to
+            all features.  Note: Since Dropout is applied just before the classification layer, it is
+            only useful when `include_top` is set to True.
+        :param endpoint_logit: (boolean) optional. If True, the model's forward pass will end at
+            producing logits. Otherwise, softmax is applied after producing the logits to produce
+            the class probabilities prediction. Setting this parameter to True is particularly useful
+            when you want to combine results of rgb model and optical flow model.
+            - `True` end model forward pass at logit output
+            - `False` go further after logit to produce softmax predictions
+            Note: This parameter is only useful when `include_top` is set to True.
+        :param classes: For regression (i.e. behavorial cloning) 1 is the default value. optional number
+            of classes to classify images into, only to be specified if `include_top` is True, and if
+            no `weights` argument is specified.
 
         '''
 
         self.input_shape = input_shape
         self.dropout_prob = dropout_prob
-        self.endpoint_logit = endpoint_logit
         self.classes = classes
         self.weight_path = weights_path
 
         input_shape = self._obtain_input_shape(self.input_shape, default_frame_size=224,
                                                min_frame_size=32, default_num_frames=64,
-                                               min_num_frames=8, data_format=K.image_data_format())  # weights=weights
+                                               min_num_frames=1, data_format=K.image_data_format())  # weights=weights
 
         img_input = Input(shape=input_shape)
         self.model = self.create_model(img_input)
@@ -99,11 +93,15 @@ class i3d:
     def summary(self):
         print(self.model.summary())
 
-    def train(self, train_gen, epochs=10, epoch_steps=5000, val_gen=None, val_steps=None, validation=False, log_path="logs/32/", save_path=None):
+    def train(self, type, labels, val_labels,
+              epochs=10, epoch_steps=5000, val_steps=None,
+              validation=False, log_path="logs/32_flow_small", save_path=None):
 
         '''training the model
 
-        :param train_gen: training generator. For details, please read the implementation in helper.py
+        :param type: tye type of model. Choices are: flow or rgb
+        :param train_gen: training generator. For details, please read the
+        implementation in helper.py
         :param val_gen: validation generator, for now it's required.
         :param epoch: number of training epochs.
         :param epoch_steps: number of training steps per epoch. (!= batch_size)
@@ -112,26 +110,150 @@ class i3d:
         :param validation: run validation or not. If not validating, val_gen and val_steps can be non.
         '''
 
-        if save_path == None:
+        if type == 'flow':
+            train_gen = helper.udacity_flow_batch_gen(batch_size=1, data=labels)
+            val_gen = helper.udacity_flow_val_gen(batch_size=1, data=val_labels)
+        elif type == 'rgb':
+            train_gen = helper.udacity_batch_generator(batch_size=4, data=labels, augment=False)
+            val_gen = helper.validation_batch_generator(batch_size=1, data=val_labels)
+        else:
+            raise Exception('Sorry, the model type is not recognized')
+
+        if save_path is None:
             print("[WARNING]: trained model will not be saved. Please specify save_path")
 
         tensorboard = TensorBoard(log_dir=(log_path + "/{}".format(datetime.datetime.now())))
 
         if validation:
-            if val_gen and val_steps:
-                self.model.fit_generator(train_gen, steps_per_epoch=epoch_steps,
-                                         epochs=epochs, validation_data=val_gen,
-                                         validation_steps=val_steps,
-                                         verbose=1, callbacks=[tensorboard])  #
+            if val_steps:
+                self.model.fit_generator(train_gen, steps_per_epoch=epoch_steps, epochs=epochs, validation_data=val_gen, validation_steps=val_steps,
+                                         verbose=1, callbacks=[tensorboard])
             else:
-                raise Exception('please specify val_gen and val_steps')
+                raise Exception('please specify val_steps')
 
         else:
-            self.model.fit_generator(train_gen, steps_per_epoch=epoch_steps, epochs=epochs, verbose=1, callbacks=[tensorboard])
+            self.model.fit_generator(train_gen, steps_per_epoch=epoch_steps,
+                                     epochs=epochs, verbose=1, callbacks=[tensorboard])
 
         self.model.save(save_path)
 
-    def create_model(self, img_input):
+    def create_small_model(self, img_input):
+
+        '''create and return the i3d model
+                :param: img_input: input shape of the network.
+                :return: A Keras model instance.
+                '''
+
+        # Determine proper input shape
+
+        channel_axis = 4
+
+        # Downsampling via convolution (spatial and temporal)
+        x = self.conv3d_bath_norm(img_input, 64, 7, 7, 7, strides=(2, 2, 2), padding='same', name='Conv3d_1a_7x7')
+
+        # Downsampling (spatial only)
+        x = MaxPooling3D((1, 3, 3), strides=(1, 2, 2), padding='same', name='MaxPool2d_2a_3x3')(x)
+        x = self.conv3d_bath_norm(x, 64, 1, 1, 1, strides=(1, 1, 1), padding='same', name='Conv3d_2b_1x1')
+        x = self.conv3d_bath_norm(x, 192, 3, 3, 3, strides=(1, 1, 1), padding='same', name='Conv3d_2c_3x3')
+
+        # Downsampling (spatial only)
+        x = MaxPooling3D((1, 3, 3), strides=(1, 2, 2), padding='same', name='MaxPool2d_3a_3x3')(x)
+
+        # Mixed 3b
+        branch_0 = self.conv3d_bath_norm(x, 64, 1, 1, 1, padding='same', name='Conv3d_3b_0a_1x1')
+
+        branch_1 = self.conv3d_bath_norm(x, 96, 1, 1, 1, padding='same', name='Conv3d_3b_1a_1x1')
+        branch_1 = self.conv3d_bath_norm(branch_1, 128, 3, 3, 3, padding='same', name='Conv3d_3b_1b_3x3')
+
+        branch_2 = self.conv3d_bath_norm(x, 16, 1, 1, 1, padding='same', name='Conv3d_3b_2a_1x1')
+        branch_2 = self.conv3d_bath_norm(branch_2, 32, 3, 3, 3, padding='same', name='Conv3d_3b_2b_3x3')
+
+        branch_3 = MaxPooling3D((3, 3, 3), strides=(1, 1, 1), padding='same', name='MaxPool2d_3b_3a_3x3')(x)
+        branch_3 = self.conv3d_bath_norm(branch_3, 32, 1, 1, 1, padding='same', name='Conv3d_3b_3b_1x1')
+
+        x = layers.concatenate([branch_0, branch_1, branch_2, branch_3], axis=channel_axis, name='Mixed_3b')
+
+        # Mixed 3c
+        branch_0 = self.conv3d_bath_norm(x, 128, 1, 1, 1, padding='same', name='Conv3d_3c_0a_1x1')
+
+        branch_1 = self.conv3d_bath_norm(x, 128, 1, 1, 1, padding='same', name='Conv3d_3c_1a_1x1')
+        branch_1 = self.conv3d_bath_norm(branch_1, 192, 3, 3, 3, padding='same', name='Conv3d_3c_1b_3x3')
+
+        branch_2 = self.conv3d_bath_norm(x, 32, 1, 1, 1, padding='same', name='Conv3d_3c_2a_1x1')
+        branch_2 = self.conv3d_bath_norm(branch_2, 96, 3, 3, 3, padding='same', name='Conv3d_3c_2b_3x3')
+
+        branch_3 = MaxPooling3D((3, 3, 3), strides=(1, 1, 1), padding='same', name='MaxPool2d_3c_3a_3x3')(x)
+        branch_3 = self.conv3d_bath_norm(branch_3, 64, 1, 1, 1, padding='same', name='Conv3d_3c_3b_1x1')
+
+        x = layers.concatenate([branch_0, branch_1, branch_2, branch_3], axis=channel_axis, name='Mixed_3c')
+
+        # Downsampling (spatial and temporal)
+        x = MaxPooling3D((3, 3, 3), strides=(2, 2, 2), padding='same', name='MaxPool2d_4a_3x3')(x)
+
+        # Mixed 4b
+        branch_0 = self.conv3d_bath_norm(x, 192, 1, 1, 1, padding='same', name='Conv3d_4b_0a_1x1')
+
+        branch_1 = self.conv3d_bath_norm(x, 96, 1, 1, 1, padding='same', name='Conv3d_4b_1a_1x1')
+        branch_1 = self.conv3d_bath_norm(branch_1, 208, 3, 3, 3, padding='same', name='Conv3d_4b_1b_3x3')
+
+        branch_2 = self.conv3d_bath_norm(x, 16, 1, 1, 1, padding='same', name='Conv3d_4b_2a_1x1')
+        branch_2 = self.conv3d_bath_norm(branch_2, 48, 3, 3, 3, padding='same', name='Conv3d_4b_2b_3x3')
+
+        branch_3 = MaxPooling3D((3, 3, 3), strides=(1, 1, 1), padding='same', name='MaxPool2d_4b_3a_3x3')(x)
+        branch_3 = self.conv3d_bath_norm(branch_3, 64, 1, 1, 1, padding='same', name='Conv3d_4b_3b_1x1')
+
+        x = layers.concatenate([branch_0, branch_1, branch_2, branch_3], axis=channel_axis, name='Mixed_4b')
+
+        # Mixed 4c
+        branch_0 = self.conv3d_bath_norm(x, 160, 1, 1, 1, padding='same', name='Conv3d_4c_0a_1x1')
+
+        branch_1 = self.conv3d_bath_norm(x, 112, 1, 1, 1, padding='same', name='Conv3d_4c_1a_1x1')
+        branch_1 = self.conv3d_bath_norm(branch_1, 224, 3, 3, 3, padding='same', name='Conv3d_4c_1b_3x3')
+
+        branch_2 = self.conv3d_bath_norm(x, 24, 1, 1, 1, padding='same', name='Conv3d_4c_2a_1x1')
+        branch_2 = self.conv3d_bath_norm(branch_2, 64, 3, 3, 3, padding='same', name='Conv3d_4c_2b_3x3')
+
+        branch_3 = MaxPooling3D((3, 3, 3), strides=(1, 1, 1), padding='same', name='MaxPool2d_4c_3a_3x3')(x)
+        branch_3 = self.conv3d_bath_norm(branch_3, 64, 1, 1, 1, padding='same', name='Conv3d_4c_3b_1x1')
+
+        x = layers.concatenate([branch_0, branch_1, branch_2, branch_3], axis=channel_axis, name='Mixed_4c')
+
+        # Mixed 4d
+        branch_0 = self.conv3d_bath_norm(x, 128, 1, 1, 1, padding='same', name='Conv3d_4d_0a_1x1')
+
+        branch_1 = self.conv3d_bath_norm(x, 128, 1, 1, 1, padding='same', name='Conv3d_4d_1a_1x1')
+        branch_1 = self.conv3d_bath_norm(branch_1, 256, 3, 3, 3, padding='same', name='Conv3d_4d_1b_3x3')
+
+        branch_2 = self.conv3d_bath_norm(x, 24, 1, 1, 1, padding='same', name='Conv3d_4d_2a_1x1')
+        branch_2 = self.conv3d_bath_norm(branch_2, 64, 3, 3, 3, padding='same', name='Conv3d_4d_2b_3x3')
+
+        branch_3 = MaxPooling3D((3, 3, 3), strides=(1, 1, 1), padding='same', name='MaxPool2d_4d_3a_3x3')(x)
+        branch_3 = self.conv3d_bath_norm(branch_3, 64, 1, 1, 1, padding='same', name='Conv3d_4d_3b_1x1')
+
+        x = layers.concatenate([branch_0, branch_1, branch_2, branch_3], axis=channel_axis, name='Mixed_4d')
+
+        x = AveragePooling3D((2, 7, 7), strides=(1, 1, 1), padding='valid', name='global_avg_pool')(x)
+
+        x = Flatten()(x)
+        x = Dropout(0.5)(x)
+        # x = Dense(128, activation='relu')(x)
+        # x = Dropout(0.5)(x)
+        x = Dense(64, activation='relu')(x)
+        x = Dropout(0.5)(x)
+        x = Dense(32, activation='relu')(x)
+        x = Dropout(0.5)(x)
+        x = Dense(self.classes)(x)
+
+        inputs = img_input
+
+        # create model
+        model = Model(inputs, x, name='i3d_inception')
+        sgd = SGD(lr=0.0001, decay=1e-6, momentum=0.9, nesterov=True)
+        model.compile(loss=self.root_mean_squared_error, optimizer=sgd)
+
+        return model
+
+    def create_model(self, img_input, optimizer=Adam(lr=1e-4)):
 
         '''create and return the i3d model
         :param: img_input: input shape of the network.
@@ -296,20 +418,13 @@ class i3d:
         x = Flatten()(x)
         x = Dense(self.classes)(x)
 
-        # logits (raw scores for each class)
-        # x = Lambda(lambda x: K.mean(x, axis=1, keepdims=False), output_shape=lambda s: (s[0], s[2]))(x)
-
-        # if not self.endpoint_logit:
-        #     x = Activation('softmax', name='prediction')(x)
-        # ===
-
         inputs = img_input
 
         # create model
         model = Model(inputs, x, name='i3d_inception')
-        optimizer = Adam(lr=1e-5, decay=1e-6)
-        #
-        model.compile(loss=self.root_mean_squared_error, optimizer=optimizer, metrics=[self.root_mean_squared_error])
+        # sgd = SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True)
+
+        model.compile(loss=self.root_mean_squared_error, optimizer=optimizer)
 
         return model
 
