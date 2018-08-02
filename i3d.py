@@ -93,15 +93,12 @@ class i3d:
     def summary(self):
         print(self.model.summary())
 
-    def train(self, type, labels, val_labels,
-              epochs=10, epoch_steps=5000, val_steps=None,
-              validation=False, log_path="logs/32_flow_small", save_path=None):
+    def train(self, type, labels, val_labels, epochs=10, epoch_steps=5000, val_steps=1000, validation=False, log_path="logs", save_path=None):
 
         '''training the model
 
         :param type: tye type of model. Choices are: flow or rgb
-        :param train_gen: training generator. For details, please read the
-        implementation in helper.py
+        :param train_gen: training generator. For details, please read the implementation in helper.py
         :param val_gen: validation generator, for now it's required.
         :param epoch: number of training epochs.
         :param epoch_steps: number of training steps per epoch. (!= batch_size)
@@ -114,7 +111,7 @@ class i3d:
             train_gen = helper.udacity_flow_batch_gen(batch_size=1, data=labels)
             val_gen = helper.udacity_flow_val_gen(batch_size=1, data=val_labels)
         elif type == 'rgb':
-            train_gen = helper.udacity_batch_generator(batch_size=4, data=labels, augment=False)
+            train_gen = helper.udacity_batch_generator(batch_size=2, data=labels, augment=False)
             val_gen = helper.validation_batch_generator(batch_size=1, data=val_labels)
         else:
             raise Exception('Sorry, the model type is not recognized')
@@ -125,24 +122,19 @@ class i3d:
         tensorboard = TensorBoard(log_dir=(log_path + "/{}".format(datetime.datetime.now())))
 
         if validation:
-            if val_steps:
-                self.model.fit_generator(train_gen, steps_per_epoch=epoch_steps, epochs=epochs, validation_data=val_gen, validation_steps=val_steps,
-                                         verbose=1, callbacks=[tensorboard])
-            else:
-                raise Exception('please specify val_steps')
-
+            self.model.fit_generator(train_gen, steps_per_epoch=epoch_steps, epochs=epochs, verbose=1, callbacks=[tensorboard],
+                                     validation_data=val_gen, validation_steps=val_steps)
         else:
-            self.model.fit_generator(train_gen, steps_per_epoch=epoch_steps,
-                                     epochs=epochs, verbose=1, callbacks=[tensorboard])
+            self.model.fit_generator(train_gen, steps_per_epoch=epoch_steps, epochs=epochs, verbose=1, callbacks=[tensorboard])
 
         self.model.save(save_path)
 
     def create_small_model(self, img_input):
 
         '''create and return the i3d model
-                :param: img_input: input shape of the network.
-                :return: A Keras model instance.
-                '''
+        :param: img_input: input shape of the network.
+        :return: A Keras model instance.
+        '''
 
         # Determine proper input shape
 
@@ -423,7 +415,6 @@ class i3d:
         # create model
         model = Model(inputs, x, name='i3d_inception')
         # sgd = SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True)
-
         model.compile(loss=self.root_mean_squared_error, optimizer=optimizer)
 
         return model
@@ -437,7 +428,6 @@ class i3d:
                          use_bias=False, use_activation_fn=True, use_bn=True, name=None):
 
         '''
-
         :param x: input tensor.
         :param filters: filters in `Conv3D`.
         :param num_frames: frames (time depth) of the convolution kernel.
@@ -448,9 +438,8 @@ class i3d:
         :param use_bias: use bias or not
         :param use_activation_fn: use an activation function or not.
         :param use_bn: use batch normalization or not.
-        :param name: name of the ops; will become `name + '_conv'`
-                for the convolution and `name + '_bn'` for the
-                batch norm layer.
+        :param name: name of the ops; will become `name + '_conv'` for the convolution and
+            `name + '_bn'` for the batch norm layer.
         :return: Output tensor after applying `Conv3D` and `BatchNormalization`.
         '''
 
@@ -477,31 +466,20 @@ class i3d:
     def _obtain_input_shape(input_shape, default_frame_size, min_frame_size, default_num_frames,
                             min_num_frames, data_format, weights=None):
 
-        """Internal utility to compute/validate the model's input shape.
-        (Adapted from `keras/applications/imagenet_utils.py`)
+        '''
+        :param input_shape:         either None (will return the default network input shape), or a user-provided shape to be validated.
+        :param default_frame_size:  default input frames(images) width/height for the model.
+        :param min_frame_size:      minimum input frames(images) width/height accepted by the model.
+        :param default_num_frames:  default input number of frames(images) for the model.
+        :param min_num_frames:      minimum input number of frames accepted by the model.
+        :param data_format:         image data format to use.
+        :param weights:             one of `None` (random initialization)  or 'kinetics_only' (pre-training on Kinetics dataset).
+            or 'imagenet_and_kinetics' (pre-training on ImageNet and Kinetics datasets). If weights='kinetics_only' or
+            weights=='imagenet_and_kinetics' then input channels must be equal to 3.
+        :return                     An integer shape tuple (may include None entries).
+        :raise                      ValueError: in case of invalid argument values.
+        '''
 
-        # Arguments
-            input_shape: either None (will return the default network input shape),
-                or a user-provided shape to be validated.
-            default_frame_size: default input frames(images) width/height for the model.
-            min_frame_size: minimum input frames(images) width/height accepted by the model.
-            default_num_frames: default input number of frames(images) for the model.
-            min_num_frames: minimum input number of frames accepted by the model.
-            data_format: image data format to use.
-            require_flatten: whether the model is expected to
-                be linked to a classifier via a Flatten layer.
-            weights: one of `None` (random initialization)
-                or 'kinetics_only' (pre-training on Kinetics dataset).
-                or 'imagenet_and_kinetics' (pre-training on ImageNet and Kinetics datasets).
-                If weights='kinetics_only' or weights=='imagenet_and_kinetics' then
-                input channels must be equal to 3.
-
-        # Returns
-            An integer shape tuple (may include None entries).
-
-        # Raises
-            ValueError: in case of invalid argument values.
-        """
         if weights != 'kinetics_only' and weights != 'imagenet_and_kinetics' and input_shape and len(input_shape) == 4:
             if data_format == 'channels_first':
                 if input_shape[0] not in {1, 3}:

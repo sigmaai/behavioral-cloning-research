@@ -2,14 +2,22 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b027388d-c04c-4f0c-bbc3-588f91abe324" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/communication.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/32_rgb/2018-08-01 09:41:05.804347/events.out.tfevents.1533130878.neil-ML" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/64_rgb/2018-08-01 10:50:32.110227/events.out.tfevents.1533135046.neil-ML" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/64_rgb/2018-08-01 10:52:14.104136/events.out.tfevents.1533135147.neil-ML" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/64_rgb/2018-08-01 12:15:41.982818/events.out.tfevents.1533140154.neil-ML" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/64_rgb/2018-08-01 14:41:33.997773/events.out.tfevents.1533148906.neil-ML" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/64_rgb/2018-08-01 16:01:50.277382/events.out.tfevents.1533153723.neil-ML" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/64_rgb/2018-08-01 17:53:29.080133/events.out.tfevents.1533160421.neil-ML" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/64_rgb/2018-08-01 20:08:41.056367/events.out.tfevents.1533168533.neil-ML" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/64_rgb/2018-08-01 21:16:32.500253/events.out.tfevents.1533172604.neil-ML" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/logs/64_rgb/2018-08-01 22:31:26.836215/events.out.tfevents.1533177099.neil-ML" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/helper.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/communication.py" beforeDir="false" afterPath="$PROJECT_DIR$/communication.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/configs.py" beforeDir="false" afterPath="$PROJECT_DIR$/configs.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/i3d.py" beforeDir="false" afterPath="$PROJECT_DIR$/i3d.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/i3d_inception.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/train.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/validation.py" beforeDir="false" afterPath="$PROJECT_DIR$/validation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/visualization.py" beforeDir="false" afterPath="$PROJECT_DIR$/visualization.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -21,31 +29,31 @@
     <session id="670928201">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="5" />
+          <entry key="project.closed" value="6" />
           <entry key="project.open.time.13" value="1" />
           <entry key="project.open.time.2" value="2" />
-          <entry key="project.open.time.6" value="1" />
-          <entry key="project.opened" value="5" />
+          <entry key="project.open.time.6" value="2" />
+          <entry key="project.opened" value="6" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="810" />
+          <entry key="py" value="1197" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="810" />
+          <entry key="Python" value="1197" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Python" value="2" />
+          <entry key="Python" value="5" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="py" value="2" />
+          <entry key="py" value="5" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.js.language.service.starts" />
@@ -56,29 +64,44 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/train.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="210">
-              <caret line="14" column="14" selection-start-line="14" selection-start-column="14" selection-end-line="14" selection-end-column="14" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/i3d.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="138">
-              <caret line="116" column="67" selection-start-line="116" selection-start-column="67" selection-end-line="116" selection-end-column="67" />
+            <state relative-caret-position="366">
+              <caret line="29" column="78" selection-start-line="29" selection-start-column="78" selection-end-line="29" selection-end-column="78" />
               <folding>
-                <element signature="e#388#425#0" expanded="true" />
+                <element signature="e#287#306#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/validation.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="281">
+              <caret line="69" column="26" lean-forward="true" selection-start-line="69" selection-start-column="26" selection-end-line="69" selection-end-column="26" />
+              <folding>
+                <element signature="e#53#72#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/configs.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="105">
-              <caret line="7" column="33" selection-start-line="7" selection-start-column="33" selection-end-line="7" selection-end-column="33" />
+            <state relative-caret-position="165">
+              <caret line="11" column="21" selection-start-line="11" selection-start-column="21" selection-end-line="11" selection-end-column="21" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/communication.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="321">
+              <caret line="37" column="42" selection-start-line="37" selection-start-column="42" selection-end-line="37" selection-end-column="42" />
+              <folding>
+                <element signature="e#0#14#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -98,13 +121,13 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/configs.py" />
         <option value="$PROJECT_DIR$/visualization.py" />
         <option value="$PROJECT_DIR$/helper.py" />
+        <option value="$PROJECT_DIR$/configs.py" />
         <option value="$PROJECT_DIR$/i3d.py" />
-        <option value="$PROJECT_DIR$/validation.py" />
         <option value="$PROJECT_DIR$/communication.py" />
         <option value="$PROJECT_DIR$/train.py" />
+        <option value="$PROJECT_DIR$/validation.py" />
       </list>
     </option>
   </component>
@@ -133,6 +156,11 @@
               <item name="behavioral-cloning-research" type="b2602c69:ProjectViewProjectNode" />
               <item name="behavioral-cloning-research" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="behavioral-cloning-research" type="b2602c69:ProjectViewProjectNode" />
+              <item name="behavioral-cloning-research" type="462c0819:PsiDirectoryNode" />
+              <item name="logs" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
@@ -141,17 +169,17 @@
   </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../speed_challenge" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="settings.editor.selected.configurable" value="preferences.general" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/logs/i3d" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -190,9 +218,8 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="54" y="-4" width="1547" height="905" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.53" visible="true" weight="0.17144763" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.53" visible="true" weight="0.17344896" />
       <window_info id="Structure" order="1" sideWeight="0.47" side_tool="true" weight="0.17144763" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -204,7 +231,7 @@
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32860824" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="8" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Terminal" order="9" weight="0.34149486" />
+      <window_info anchor="bottom" id="Terminal" order="9" visible="true" weight="0.34149486" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
       <window_info anchor="bottom" id="Version Control" order="11" weight="0.3293011" />
       <window_info anchor="bottom" id="Python Console" order="12" />
@@ -241,48 +268,50 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/train.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="14" column="14" selection-start-line="14" selection-start-column="14" selection-end-line="14" selection-end-column="14" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/communication.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="6" selection-start-line="6" selection-end-line="6" />
-          <folding>
-            <element signature="e#0#14#0" expanded="true" />
-            <marker date="1533090552942" expanded="true" signature="133:134" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/i3d.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="138">
-          <caret line="116" column="67" selection-start-line="116" selection-start-column="67" selection-end-line="116" selection-end-column="67" />
+        <state relative-caret-position="-4315">
+          <caret line="113" column="67" selection-start-line="113" selection-start-column="67" selection-end-line="113" selection-end-column="67" />
           <folding>
             <element signature="e#388#425#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/validation.py">
+    <entry file="file://$PROJECT_DIR$/configs.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="601">
-          <caret line="71" column="43" selection-start-line="71" selection-start-column="43" selection-end-line="71" selection-end-column="43" />
+        <state relative-caret-position="165">
+          <caret line="11" column="21" selection-start-line="11" selection-start-column="21" selection-end-line="11" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/communication.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="321">
+          <caret line="37" column="42" selection-start-line="37" selection-start-column="42" selection-end-line="37" selection-end-column="42" />
           <folding>
-            <element signature="e#53#72#0" expanded="true" />
+            <element signature="e#0#14#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/configs.py">
+    <entry file="file://$PROJECT_DIR$/train.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="7" column="33" selection-start-line="7" selection-start-column="33" selection-end-line="7" selection-end-column="33" />
+        <state relative-caret-position="366">
+          <caret line="29" column="78" selection-start-line="29" selection-start-column="78" selection-end-line="29" selection-end-column="78" />
+          <folding>
+            <element signature="e#287#306#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/validation.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="281">
+          <caret line="69" column="26" lean-forward="true" selection-start-line="69" selection-start-column="26" selection-end-line="69" selection-end-column="26" />
+          <folding>
+            <element signature="e#53#72#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
