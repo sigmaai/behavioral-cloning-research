@@ -1,6 +1,8 @@
 #
 #
-#
+# helper functions for sending notifications after
+# training and validation.
+# (c) Neil Nie, All Rights Reserved.
 #
 
 import smtplib

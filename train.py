@@ -19,15 +19,19 @@ import communication
 
 if __name__ == '__main__':
 
+    load_weights = "./i3d_rgb_64_8.h5"
+    save_weights = "./i3d_rgb_64_9.h5"
 
     i3d_model = i3d(input_shape=(configs.LENGTH, configs.IMG_HEIGHT, configs.IMG_WIDTH, 3),
-                    weights_path="./i3d_rgb_64_6.h5")
+                    weights_path=load_weights)
     i3d_model.summary()
 
     labels = pd.read_csv('/home/neil/dataset/udacity/main.csv').values
     val_labels = pd.read_csv('/home/neil/dataset/steering/test/labels.csv')
 
-    i3d_model.train(type='rgb', labels=labels, val_labels=val_labels, epochs=3, epoch_steps=800, validation=True, val_steps=1000,
-                    save_path='./i3d_rgb_64_7.h5', log_path=configs.LOG_PATH)
+    i3d_model.train(type='rgb', labels=labels, val_labels=val_labels, epochs=5,
+                    epoch_steps=300, validation=True, val_steps=500,
+                    save_path=save_weights,
+                    log_path=configs.LOG_PATH)
 
     communication.notify_training_completion(configs.LOG_PATH)

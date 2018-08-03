@@ -93,7 +93,7 @@ class i3d:
     def summary(self):
         print(self.model.summary())
 
-    def train(self, type, labels, val_labels, epochs=10, epoch_steps=5000, val_steps=1000, validation=False, log_path="logs", save_path=None):
+    def train(self, type, labels, val_labels, save_path, epochs=10, epoch_steps=5000, val_steps=1000, validation=False, log_path="logs", ):
 
         '''training the model
 
@@ -108,16 +108,13 @@ class i3d:
         '''
 
         if type == 'flow':
-            train_gen = helper.udacity_flow_batch_gen(batch_size=1, data=labels)
+            train_gen = helper.udacity_flow_batch_gen(batch_size=2, data=labels)
             val_gen = helper.udacity_flow_val_gen(batch_size=1, data=val_labels)
         elif type == 'rgb':
-            train_gen = helper.udacity_batch_generator(batch_size=2, data=labels, augment=False)
-            val_gen = helper.validation_batch_generator(batch_size=1, data=val_labels)
+            train_gen = helper.udacity_batch_generator(batch_size=4, data=labels, augment=False)
+            val_gen = helper.validation_batch_generator(batch_size=2, data=val_labels)
         else:
             raise Exception('Sorry, the model type is not recognized')
-
-        if save_path is None:
-            print("[WARNING]: trained model will not be saved. Please specify save_path")
 
         tensorboard = TensorBoard(log_dir=(log_path + "/{}".format(datetime.datetime.now())))
 
