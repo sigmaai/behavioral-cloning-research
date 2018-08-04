@@ -11,7 +11,7 @@
 # Contact: contact@neilnie.com
 #
 
-from i3d import i3d
+from i3d import Inception3D
 import configs
 import pandas as pd
 import communication
@@ -22,8 +22,8 @@ if __name__ == '__main__':
     load_weights = "./i3d_rgb_64_8.h5"
     save_weights = "./i3d_rgb_64_9.h5"
 
-    i3d_model = i3d(input_shape=(configs.LENGTH, configs.IMG_HEIGHT, configs.IMG_WIDTH, 3),
-                    weights_path=load_weights)
+    i3d_model = Inception3D(input_shape=(configs.LENGTH, configs.IMG_HEIGHT, configs.IMG_WIDTH, 3),
+                            weights_path=load_weights)
     i3d_model.summary()
 
     labels = pd.read_csv('/home/neil/dataset/udacity/main.csv').values

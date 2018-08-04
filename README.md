@@ -1,5 +1,9 @@
 # Behavioral Cloning Research
 
+<center>
+<img src='./media/visual.png' alt="Drawing" width="480"/>
+</center>
+
 # Introduction
 
 In 1989, ALVINN, the self-driving car (truck) made by Dr. Dean Pomerleau and his team, drove around the Carnegie Mellon campus. According to Pomerleau, The vehicle was powered by a CPU slower than the Apple Watch. The car used a fully connected neural network to predict the steering angle of the car in real time. Fast forward twenty years, NVIDIA proposed a novel method that combines Pomerleau's idea with the modern GPU, giving NVIDIA's car the capability to accurately perform real-time end to end steering prediction. Around the same time, Udacity held a challenge that asked researchers to create the best end to end steering prediction model. This project is deeply inspired by that competition, and the goal is to further the work in behavioral cloning for self-driving vehicles. 
@@ -36,8 +40,6 @@ Optical flow model training results coming soon... 🔧
 | i3d 32 Frame RGB + Flow  	| 19 million   |    -- | |-->
 
 The i3d model architecture proved that spacial-temporal information could drastically improve the performance of the behavioral cloning system. After fewer than 80K steps of training, the network's validation loss scored half of the validation score of the single frame CNN. 
-
-![](./media/visual.png)
 
 ## Performance 🔍
 

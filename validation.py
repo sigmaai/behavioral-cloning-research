@@ -1,10 +1,13 @@
 #
+# Running the validation score
+# for the steering models
+#
 # (c) Yongyang Nie
 # 2018, All Rights Reserved
 #
 
 
-from i3d import i3d
+from i3d import Inception3D
 import configs
 from os import path
 import pandas as pd
@@ -17,7 +20,8 @@ import communication
 
 def validation_score(model_path, write_output=False):
 
-    model = i3d(input_shape=(configs.LENGTH, configs.IMG_HEIGHT, configs.IMG_WIDTH, configs.CHANNELS), weights_path=model_path)
+    model = Inception3D(input_shape=(configs.LENGTH, configs.IMG_HEIGHT, configs.IMG_WIDTH, configs.CHANNELS),
+                        weights_path=model_path)
 
     # steerings and images
     steering_labels = path.join(configs.VAL_DIR, 'labels.csv')
@@ -25,33 +29,29 @@ def validation_score(model_path, write_output=False):
     df_truth = pd.read_csv(steering_labels, usecols=['frame_id', 'steering_angle'], index_col=None)
 
     esum = 0
-    count = 0
-    input = []
+    inputs = []
     predictions = []
-
     start_time = time.time()
 
     for i in range(configs.LENGTH):
         file = configs.VAL_DIR + "center/" + str(df_truth['frame_id'].loc[i]) + ".jpg"
         img = helper.load_image(file)
-        input.append(img)
+        inputs.append(img)
 
     # Run through all images
     for i in range(configs.LENGTH, len(df_truth)):
 
         img = helper.load_image(configs.VAL_DIR + "center/" + str(df_truth['frame_id'].loc[i]) + ".jpg")
-        input.pop(0)
-        input.append(img)
-        input_array = np.array([input])
-        prediction = model.model.predict(input_array)[0][0]
+        inputs.pop(0)
+        inputs.append(img)
+        prediction = model.model.predict(np.array([input]))[0][0]
         actual_steers = df_truth['steering_angle'].loc[i]
         e = (actual_steers - prediction) ** 2
         esum += e
-        count += 1
 
         predictions.append(prediction)
 
-        if count % 1000 == 0:
+        if len(predictions) % 1000 == 0:
             print('.')
 
     print("time per step: %s seconds" % ((time.time() - start_time) / len(predictions)))

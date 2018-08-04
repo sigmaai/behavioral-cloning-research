@@ -1,21 +1,20 @@
-'''
-Dataset visualization tool
-Original By: Comma.ai and Chris Gundling
-Revised and used by Neil Nie
-'''
 
-from __future__ import print_function
+# Dataset visualization tool
+# Original By: Comma.ai and Chris Gundling
+# Revised and used by Neil Nie
+
+
+import matplotlib.backends.backend_agg as agg
+from i3d import Inception3D
+import pandas as pd
+from os import path
 import numpy as np
 import cv2
 import pygame
-import pandas as pd
-from os import path
-import matplotlib
-import matplotlib.backends.backend_agg as agg
 import pylab
-from i3d import i3d
 import helper
 import configs
+
 
 pygame.init()
 size = (640, 650)
@@ -82,7 +81,6 @@ def draw_path(img, path_x, path_y, color):
 # ***** functions to draw predicted path *****
 
 def calc_curvature(v_ego, angle_steers, angle_offset=0):
-    deg_to_rad = np.pi / 180.
     slip_fator = 0.0014  # slip factor obtained from real data
     steer_ratio = 15.3  # from http://www.edmunds.com/acura/ilx/2016/road-test-specs/
     wheel_base = 2.67  # from http://www.edmunds.com/acura/ilx/2016/sedan/features-specs/
@@ -90,7 +88,6 @@ def calc_curvature(v_ego, angle_steers, angle_offset=0):
     angle_steers_rad = (angle_steers - angle_offset)  # * deg_to_rad
     curvature = angle_steers_rad / (steer_ratio * wheel_base * (1. + slip_fator * v_ego ** 2))
     return curvature
-
 
 def calc_lookahead_offset(v_ego, angle_steers, d_lookahead, angle_offset=0):
     # *** this function returns the lateral offset given the steering angle, speed and the lookahead distance
@@ -107,12 +104,13 @@ def draw_path_on(img, speed_ms, angle_steers, color=(0, 0, 255)):
     draw_path(img, path_x, path_y, color)
 
 
-def steering_loop():
+def steering_loop(model_path):
 
     # loading models
-    model = i3d(weights_path='i3d_32_15.h5', input_shape=(configs.LENGTH, configs.IMG_HEIGHT, configs.IMG_WIDTH, configs.CHANNELS))
+    model = Inception3D(weights_path=model_path,
+                        input_shape=(configs.LENGTH, configs.IMG_HEIGHT, configs.IMG_WIDTH, configs.CHANNELS))
     model.summary()
-    # -------------------------------------------------
+
     # steerings and images
     steering_labels = path.join(configs.VAL_DIR, 'labels.csv')
 
@@ -130,17 +128,17 @@ def steering_loop():
     b = []
     ax.legend(loc='upper left', fontsize=8)
 
-    myFont = pygame.font.SysFont("monospace", 18)
-    randNumLabel = myFont.render('Human Steer Angle:', 1, blue)
-    randNumLabel2 = myFont.render('Model Steer Angle:', 1, red)
+    my_font = pygame.font.SysFont("monospace", 18)
+    rand_num_label = my_font.render('Human Steer Angle:', 1, blue)
+    rand_num_label2 = my_font.render('Model Steer Angle:', 1, red)
     speed_ms = 5
 
-    input = []
+    inputs = []
 
     for i in range(configs.LENGTH):
         file = configs.VAL_DIR + "center/" + str(df_truth['frame_id'].loc[i]) + ".jpg"
         img = helper.load_image(file)
-        input.append(img)
+        inputs.append(img)
 
     # Run through all images
     for i in range(configs.LENGTH, len(df_truth)):
@@ -151,10 +149,9 @@ def steering_loop():
 
         img = helper.load_image(configs.VAL_DIR + "center/" + str(df_truth['frame_id'].loc[i]) + ".jpg", auto_resize=False)
         in_frame = cv2.resize(img, (configs.IMG_WIDTH, configs.IMG_HEIGHT))
-        input.pop(0)
-        input.append(in_frame)
-        input_array = np.array([input])
-        prediction = model.model.predict(input_array)[0][0]
+        inputs.pop(0)
+        inputs.append(in_frame)
+        prediction = model.model.predict(np.array([input]))[0][0]
         actual_steers = df_truth['steering_angle'].loc[i]
 
         draw_path_on(img, speed_ms, actual_steers / 2)              # human is blue
@@ -181,10 +178,10 @@ def steering_loop():
         pygame.surfarray.blit_array(camera_surface, img.swapaxes(0, 1))
         screen.blit(camera_surface, (0, 0))
 
-        diceDisplay = myFont.render(str(round(actual_steers * PI_RAD, 4)), 1, blue)
-        diceDisplay2 = myFont.render(str(round(prediction * PI_RAD, 4)), 1, red)
-        screen.blit(randNumLabel, (50, 420))
-        screen.blit(randNumLabel2, (400, 420))
+        diceDisplay = my_font.render(str(round(actual_steers * PI_RAD, 4)), 1, blue)
+        diceDisplay2 = my_font.render(str(round(prediction * PI_RAD, 4)), 1, red)
+        screen.blit(rand_num_label, (50, 420))
+        screen.blit(rand_num_label2, (400, 420))
         screen.blit(diceDisplay, (50, 450))
         screen.blit(diceDisplay2, (400, 450))
         clock.tick(60)
@@ -193,4 +190,4 @@ def steering_loop():
 
 if __name__ == "__main__":
 
-    steering_loop()
+    steering_loop(model_path='')
