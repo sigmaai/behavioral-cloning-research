@@ -17,7 +17,7 @@ import configs
 
 
 pygame.init()
-size = (640, 650)
+size = (640, 660)
 pygame.display.set_caption("self driving data viewer")
 screen = pygame.display.set_mode(size, pygame.DOUBLEBUF)
 screen.set_alpha(None)
@@ -118,7 +118,7 @@ def steering_loop(model_path):
     df_truth = pd.read_csv(steering_labels, usecols=['frame_id', 'steering_angle'], index_col=None)
 
     # Create second screen with matplotlibs
-    fig = pylab.figure(figsize=[6.4, 1.6], dpi=100)
+    fig = pylab.figure(figsize=[6.4, 1.8], dpi=100)
     ax = fig.gca()
     ax.tick_params(axis='x', labelsize=8)
     ax.tick_params(axis='y', labelsize=8)
@@ -151,7 +151,7 @@ def steering_loop(model_path):
         in_frame = cv2.resize(img, (configs.IMG_WIDTH, configs.IMG_HEIGHT))
         inputs.pop(0)
         inputs.append(in_frame)
-        prediction = model.model.predict(np.array([input]))[0][0]
+        prediction = model.model.predict(np.array([inputs]))[0][0]
         actual_steers = df_truth['steering_angle'].loc[i]
 
         draw_path_on(img, speed_ms, actual_steers / 2)              # human is blue
@@ -190,4 +190,4 @@ def steering_loop(model_path):
 
 if __name__ == "__main__":
 
-    steering_loop(model_path='')
+    steering_loop(model_path='i3d_rgb_64_9.h5')

@@ -35,6 +35,7 @@ class SteeringPredictor:
 
         if len(self.inputs) < configs.LENGTH:
             self.inputs.append(image)
+            return 0.0
 
         if len(self.inputs) == configs.LENGTH:
             input_array = np.array([input])
