@@ -1,7 +1,7 @@
 # Behavioral Cloning Research
 
 <center>
-<img src='./media/visual.png' alt="Drawing" width="480"/>
+<img src='./media/visual.png' alt="Drawing" width="450"/>
 </center>
 
 # Introduction
@@ -31,7 +31,7 @@ During training, RMSE (root mean squared error) is used for the loss function. U
 | ------------------		|:------------:| ------------:| ---------------:|
 | Single Frame ConvNet 		| -- million   | ---          | 0.1320          |
 | i3d 32 Frame RGB     		| 12.2 million | 0.0299       | 0.0862          |
-| **i3d 64 Frame RGB** 		| 12.2 million | 0.0430       | **0.0630**      |
+| **i3d 64 Frame RGB** 		| 12.2 million | 0.0430       | **0.0530**      |
 
 Optical flow model training results coming soon... 🔧
 
