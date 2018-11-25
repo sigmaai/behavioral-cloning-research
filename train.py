@@ -19,8 +19,8 @@ import communication
 
 if __name__ == '__main__':
 
-    load_weights = "./i3d_rgb_64_8.h5"
-    save_weights = "./i3d_rgb_64_9.h5"
+    load_weights = "./i3d_rgb_64_f_v4.h5"
+    save_weights = "./i3d_rgb_64_f_v5.h5"
 
     i3d_model = Inception3D(input_shape=(configs.LENGTH, configs.IMG_HEIGHT, configs.IMG_WIDTH, 3),
                             weights_path=load_weights)
@@ -29,8 +29,8 @@ if __name__ == '__main__':
     labels = pd.read_csv('/home/neil/dataset/udacity/main.csv').values
     val_labels = pd.read_csv('/home/neil/dataset/steering/test/labels.csv')
 
-    i3d_model.train(type='rgb', labels=labels, val_labels=val_labels, epochs=5,
-                    epoch_steps=300, validation=True, val_steps=500,
+    i3d_model.train(type='rgb', labels=labels, val_labels=val_labels, epochs=5, epoch_steps=500,
+                    validation=False, val_steps=500,
                     save_path=save_weights,
                     log_path=configs.LOG_PATH)
 

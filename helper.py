@@ -85,7 +85,7 @@ def flip_image(image):
     return horizontal_img
 
 
-def augument(images, angle):
+def augument(images):
     """
     Generate an augumented image and adjust steering angle.
     (The steering angle is associated with the center image)
@@ -114,7 +114,7 @@ def augument(images, angle):
     #         images[idx] = flip_image(image)
     #     angle = -1 * angle
 
-    return images, angle
+    return images
 
 
 def get_output_dim(model):
@@ -196,7 +196,7 @@ def udacity_batch_generator(data, batch_size, augment):
     Args:
     :param data (numpy.array)        : the loaded data (converted to list from pandas format)
     :param batch_size (int)   : batch size for training
-    :param training: (boolean): whether to use augmentation or not.
+    :param augment: (boolean): whether to use augmentation or not.
 
     Yields:
          images ([tensor])  : images for training
@@ -205,7 +205,7 @@ def udacity_batch_generator(data, batch_size, augment):
     """
 
     images = np.empty([batch_size, configs.LENGTH, configs.IMG_HEIGHT, configs.IMG_WIDTH, 3], dtype=np.int32)
-    labels = np.empty([batch_size])
+    labels = np.empty([batch_size, 2])
 
     while True:
 
@@ -232,12 +232,12 @@ def udacity_batch_generator(data, batch_size, augment):
 
             # augmentaion if needed
             if augment and bool(random.getrandbits(1)):
-                imgs, angle = augument(imgs, data[end][6])
-            else:
-                angle = data[end][6]
+                imgs, angle = augument(imgs)
 
+            angle = data[end][6]
+            throttle = data[end][8] - data[end-1][8]
             images[c] = imgs
-            labels[c] = angle
+            labels[c] = [angle, throttle]
 
             c += 1
 
