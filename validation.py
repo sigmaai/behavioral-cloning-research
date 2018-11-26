@@ -44,7 +44,8 @@ def validation_score(model_path, write_output=False):
         img = helper.load_image(configs.VAL_DIR + "center/" + str(df_truth['frame_id'].loc[i]) + ".jpg")
         inputs.pop(0)
         inputs.append(img)
-        prediction = model.model.predict(np.array([input]))[0][0]
+        prediction = model.model.predict(np.array([inputs]))[0]
+        prediction = prediction[0]
         actual_steers = df_truth['steering_angle'].loc[i]
         e = (actual_steers - prediction) ** 2
         esum += e
@@ -70,7 +71,7 @@ def validation_score(model_path, write_output=False):
 if __name__ == "__main__":
 
     print("Validating...")
-    score = validation_score('i3d_rgb_64_8.h5')
+    score = validation_score('i3d_rgb_64_v10.h5')
     print("score: " + str(score))
 
-    communication.notify_validation_completion(score, 'i3d_rgb_64_8.h5')
+    communication.notify_validation_completion(score, 'i3d_rgb_64_v10.h5')
