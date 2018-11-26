@@ -95,7 +95,7 @@ def augument(images):
     :returns: a tensor of the augmented images
     :returns: the steering angle
     """
-    a = np.random.randint(0, 3, [1, 5]).astype('bool')[0]
+    a = np.random.randint(0, 4, [1, 5]).astype('bool')[0]
     if a[0] == 1:
         for idx in range(len(images)):
             image = images[idx].astype(np.uint8)
@@ -108,11 +108,6 @@ def augument(images):
         for idx in range(len(images)):
             image = images[idx].astype(np.uint8)
             images[idx] = random_brightness(image)
-    # if a[3] == 1:
-    #     for idx in range(len(images)):
-    #         image = images[idx].astype(np.uint8)
-    #         images[idx] = flip_image(image)
-    #     angle = -1 * angle
 
     return images
 
@@ -235,7 +230,7 @@ def udacity_batch_generator(data, batch_size, augment):
                 imgs, angle = augument(imgs)
 
             angle = data[end][6]
-            throttle = data[end][8] - data[end-1][8]
+            throttle = (data[end][8] - data[end-1][8]) * 50
             images[c] = imgs
             labels[c] = [angle, throttle]
 
