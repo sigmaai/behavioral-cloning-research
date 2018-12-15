@@ -190,4 +190,4 @@ def steering_loop(model_path):
 
 if __name__ == "__main__":
 
-    steering_loop(model_path='i3d_rgb_64_f_v7.h5')
+    steering_loop(model_path='i3d_small_v2.h5')

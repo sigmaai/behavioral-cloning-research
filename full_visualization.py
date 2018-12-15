@@ -80,7 +80,7 @@ def pygame_loop(label, prediction, img):
     img = visualize_steering_wheel(image=img, angle=angle)
 
     a.append(accel)         # a is prediction
-    # b.append(label)         # b is label
+    b.append(label)         # b is label
     line1.set_ydata(a)
     line1.set_xdata(range(len(a)))
     line2.set_ydata(b)
@@ -122,7 +122,7 @@ def visualize_accel(model_path, label_path):
     labels = pd.read_csv(label_path).values
 
     inputs = []
-    starting_index = 9100
+    starting_index = 9000
     end_index = 0
     # init_speed = labels[starting_index][2]
 
@@ -151,4 +151,4 @@ def visualize_accel(model_path, label_path):
 if __name__ == "__main__":
 
     visualize_accel(label_path='/hdd/ssd_2/dataset/speedchallenge/data/data.csv',
-                    model_path='i3d_rgb_64_f_v8.h5')
+                    model_path='i3d_rgb_64_v10.h5')
