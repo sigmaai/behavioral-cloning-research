@@ -1,5 +1,6 @@
 """
-Dataset visualization tool
+This visualization combines steering
+and accelerator commands.
 Original By: Comma.ai and Chris Gundling
 Revised and used by Neil Nie
 """

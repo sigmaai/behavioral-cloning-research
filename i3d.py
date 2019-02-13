@@ -32,11 +32,10 @@ import datetime
 from keras import backend as K
 import helper
 
-
 class Inception3D:
 
     def __init__(self, weights_path=None, input_shape=None,
-                 dropout_prob=0.0, classes=2):
+                 dropout_prob=0.0, classes=1):
 
         """Instantiates the Inflated 3D Inception v1 architecture.
 
@@ -68,7 +67,7 @@ class Inception3D:
         input_shape = self.input_shape
 
         img_input = Input(shape=input_shape)
-        self.model = self.create_small_model(img_input)
+        self.model = self.create_model(img_input)
 
         if weights_path:
             self.model.load_weights(weights_path)
@@ -78,7 +77,7 @@ class Inception3D:
         print(self.model.summary())
 
     def train(self, type, labels, val_labels, save_path,
-              epochs=10, epoch_steps=5000, val_steps=1000, validation=False, log_path="logs"):
+              epochs=10, epoch_steps=5000, val_steps=1000, validation=False):
 
         """training the model
 
@@ -100,16 +99,21 @@ class Inception3D:
         elif type == 'rgb':
             train_gen = helper.udacity_batch_generator(batch_size=4, data=labels, augment=False)
             val_gen = helper.validation_batch_generator(batch_size=2, data=val_labels)
+        elif type == 'gc_rgb':
+            print("Using golf cart dataset")
+            train_gen = helper.gc_batch_generator(batch_size=3, data=labels, augment=False)
+            val_gen = None
         else:
             raise Exception('Sorry, the model type is not recognized')
 
-        tensorboard = TensorBoard(log_dir=(log_path + "/{}".format(datetime.datetime.now())))
+        tensorboard = TensorBoard(log_dir=(type + "/{}".format(datetime.datetime.now())))
 
         if validation:
             self.model.fit_generator(train_gen, steps_per_epoch=epoch_steps, epochs=epochs, verbose=1, callbacks=[tensorboard],
-                                     validation_data=val_gen, validation_steps=val_steps)
+                                     validation_data=val_gen, validation_steps=val_steps, use_multiprocessing=True, workers=12)
         else:
-            self.model.fit_generator(train_gen, steps_per_epoch=epoch_steps, epochs=epochs, verbose=1, callbacks=[tensorboard])
+            self.model.fit_generator(train_gen, steps_per_epoch=epoch_steps, epochs=epochs, verbose=1, callbacks=[tensorboard],
+                                     use_multiprocessing=True, workers=12)
 
         self.model.save(save_path)
 

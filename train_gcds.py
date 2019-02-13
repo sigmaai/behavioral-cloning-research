@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-# training file for i3d model.
+# training file for i3d model, golf cart dataset
 # this project supports the udacity self-driving dataset.
 # link: https://github.com/udacity/self-driving-car/tree/master/datasets
 #
@@ -26,10 +26,11 @@ if __name__ == '__main__':
                             # weights_path=load_weights)
     i3d_model.summary()
 
-    labels = pd.read_csv('/home/neil/dataset/udacity/main.csv').values
+    labels = pd.read_csv('./main_csv.csv').values
     val_labels = pd.read_csv('/home/neil/dataset/steering/test/labels.csv')
 
-    i3d_model.train(type='rgb', labels=labels, val_labels=val_labels, epochs=5, epoch_steps=1000,
+    i3d_model.train(type='gc_rgb', labels=labels, val_labels=val_labels,
+                    epochs=5, epoch_steps=1000,
                     validation=False, val_steps=500,
                     save_path=save_weights)
 
