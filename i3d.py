@@ -31,6 +31,7 @@ from keras.callbacks import TensorBoard
 import datetime
 from keras import backend as K
 import helper
+import matplotlib.pyplot as plt
 
 class Inception3D:
 
@@ -102,7 +103,15 @@ class Inception3D:
         elif type == 'gc_rgb':
             print("Using golf cart dataset")
             train_gen = helper.gc_batch_generator(batch_size=3, data=labels, augment=False)
+            # imgs, data = next(train_gen)
+            # print imgs.shape
+            # for i in range(3):
+            #     for j in range(64):
+            #         plt.imshow(imgs[i, j, :, :, :])
+            #         plt.show()
+            #     print i
             val_gen = None
+            # exit(0)
         else:
             raise Exception('Sorry, the model type is not recognized')
 
@@ -117,7 +126,7 @@ class Inception3D:
 
         self.model.save(save_path)
 
-    def create_model(self, img_input, optimizer=Adam(lr=1e-4)):
+    def create_model(self, img_input, optimizer=Adam(lr=0.001)):
 
         """create and return the i3d model
         :param: img_input: input shape of the network.
